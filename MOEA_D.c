@@ -163,7 +163,7 @@ typedef struct
 
 #include "init.h"         /*Random Initialization of the population*/
 
-//#include "CreateSubProblems.h"
+#include "CreateSubProblems.h"
 
 #include "decode.h"       /*File decoding the binary dtrings*/
 
@@ -192,7 +192,7 @@ typedef struct
 
 #include "realmut1.h"     /*Real Mutation*/
 
-#include "keepaliven.h"   /*File For Elitism and Sharing Scheme*/
+//#include "keepaliven.h"   /*File For Elitism and Sharing Scheme*/
 
 #include "report.h"       /*Printing the report*/
 
@@ -208,108 +208,6 @@ population oldpop,
 
 /*subproblems sp,
   *c_sp_ptr;*/
-
-double norm(double x[])
-{
-	double m_sum = 0.0;
-	for (int i=0; i < nfunc; i++)
-	{
-		m_sum  += pow(x[i], 2);
-	}
-	return sqrt(m_sum);
-}
-
-double CalculateDistance(double x1, double y1, double x2, double y2)
-{
-	double diffx = x1 - x2;
-	double diffy = y1 - y2;
-	double diffx_sqr = pow(diffx,2);
-	double diffy_sqr = pow(diffy,2);
-	double distance = sqrt(diffx_sqr + diffy_sqr);
-	
-	return distance;
-}
-
-void CreateSubProblems()
-{
-	double SO[maxpop][maxpop];
-	/*subproblems *sp_tmp_ptr;
-	sp_tmp_ptr = (subproblems*) malloc(sizeof(subproblems));
-	double lamb[nfunc];
-	double A[popsize], B[popsize], C[popsize];
-	double D[maxpop][maxpop];
-	subproblems *tmp_ptr;
-	tmp_ptr = sp_tmp_ptr;
-	subproblems *tmp1_ptr;
-	tmp1_ptr = sp_tmp_ptr;
-	for(int i = 0; i < popsize; i++)
-	{
-		for(int j = 0; j < nfunc; j++)
-		{
-			srand( time(NULL) );
-			/* 產生 [0, 1) 的浮點數亂數 
-			lamb[j] = (double) rand() / (RAND_MAX + 1.0);
-		}
-		double n = norm(lamb);
-		for(int k = 0; k < nfunc; k++)
-		{
-			lamb[k] = lamb[k] / n;
-		}
-		for(int l = 0; l < nfunc; l++)
-		{
-			sp_tmp_ptr->lambda[l] = lamb[l];
-		}
-		//sp_ptr = sp_ptr->next;
-	}
-	//sp_ptr->next = 0;
-	sp_tmp_ptr = tmp_ptr;
-	for(int i = 0; i < popsize; i++)
-	{
-		for(int a = 0; a < nfunc; a++)
-		{
-			A[a] = sp_tmp_ptr->lambda[a];
-		}
-		for(int j = 0; j < popsize; j++)
-		{
-			for(int b = 0; b < nfunc; b++)
-			{
-				B[b] = sp_tmp_ptr->lambda[b];
-			}
-			D[i][j] = CalculateDistance(A[0], A[1], B[0], B[1]);
-			//tmp_ptr = tmp_ptr->next;
-		}
-		//sp_ptr = sp_ptr->next;
-	}
-	sp_tmp_ptr = tmp1_ptr;
-	for(int i = 0; i < popsize; i++)
-	{
-		double tmp[popsize];
-		for(int c = 0; c < popsize; c++)
-		{
-			C[c] = D[i][c];
-			tmp[c] = C[c];
-		}
-		for(int x = 1; x < popsize; x++)
-		{
-			if (tmp[x] > tmp[i])                //Comparing other array elements
-			{
-				int tmp_1 = tmp[i];         //Using temporary variable for storing last value
-				tmp[i] = tmp[x];            //replacing value
-				tmp[x] = tmp_1;             //storing last value
-			}
-		}
-		for(int k = 0; k < popsize; k++)
-		{
-			SO[i][k] = tmp[k];
-		}
-		for(int j = 0; j < T; j++)
-		{
-			sp_tmp_ptr->Neighbors[j] = SO[i][j];
-		}
-		//sp_ptr = sp_ptr->next;
-	}*/
-	return;
-}
   
 main(int argc, char *argv[])
 {
@@ -331,7 +229,7 @@ main(int argc, char *argv[])
 	/*subproblems *sp1_ptr;
 	sp1_ptr = (subproblems*) malloc(sizeof(subproblems));*/
 	
-	CreateSubProblems();
+	//CreateSubProblems();
 
 	rep_ptr = fopen("output.out","w");
 	gen_ptr =fopen("all_fitness.out","w");
@@ -413,7 +311,7 @@ main(int argc, char *argv[])
 	//c_sp_ptr = &(sp);
 	
 	// Create Sub-problems
-	//CreateSubProblems(old_pop_ptr->sp_ptr);
+	CreateSubProblems(old_pop_ptr->sp_ptr);
 
 	// decode binary strings
 	decode(old_pop_ptr); 
@@ -661,9 +559,9 @@ main(int argc, char *argv[])
 				//c_sp_ptr->NB_ptr = &(c_sp_ptr->Neighbors[b]);
 				if(new_pop_ptr->ind_ptr->g <= old_pop_ptr->ind_ptr->g)
 				{
-					for(i = 0;i < chrom;i++)
+					for(j = 0;j < chrom;j++)
 						*old_ptr++=*new_ptr++;
-					for(i = 0;i < nvar;i++)
+					for(j = 0;j < nvar;j++)
 						*old_ptr_r++=*new_ptr_r++;
 				}
 				/*c_sp_ptr = c_sp_ptr->next;

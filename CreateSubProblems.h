@@ -13,8 +13,8 @@ void CreateSubProblems(subproblems *sp_tmp_ptr)
 {
 	double lamb[nfunc];
 	double A[popsize], B[popsize], C[popsize];
-	double D[maxpop][maxpop];
-	double SO[maxpop][maxpop];
+	double D[popsize][popsize];
+	double SO[popsize][popsize];
 	subproblems *tmp_ptr;
 	tmp_ptr = sp_tmp_ptr;
 	subproblems *tmp1_ptr;
