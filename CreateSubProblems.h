@@ -9,16 +9,12 @@ double CalculateDistance(double x1, double y1, double x2, double y2);
 
 //double[] sort(double[] a[]);
 
-void CreateSubProblems(subproblems *sp_tmp_ptr)
+void CreateSubProblems(subproblems sp_tmp[])
 {
 	double lamb[nfunc];
 	double A[popsize], B[popsize], C[popsize];
 	double D[popsize][popsize];
 	double SO[popsize][popsize];
-	subproblems *tmp_ptr;
-	tmp_ptr = sp_tmp_ptr;
-	subproblems *tmp1_ptr;
-	tmp1_ptr = sp_tmp_ptr;
 	for(int i = 0; i < popsize; i++)
 	{
 		for(int j = 0; j < nfunc; j++)
@@ -34,30 +30,24 @@ void CreateSubProblems(subproblems *sp_tmp_ptr)
 		}
 		for(int l = 0; l < nfunc; l++)
 		{
-			sp_tmp_ptr->lambda[l] = lamb[l];
+			sp_tmp[i].lambda[l] = lamb[l];
 		}
-		//sp_ptr = sp_ptr->next;
 	}
-	//sp_ptr->next = 0;
-	sp_tmp_ptr = tmp_ptr;
 	for(int i = 0; i < popsize; i++)
 	{
 		for(int a = 0; a < nfunc; a++)
 		{
-			A[a] = sp_tmp_ptr->lambda[a];
+			A[a] = sp_tmp[i].lambda[a];
 		}
 		for(int j = 0; j < popsize; j++)
 		{
 			for(int b = 0; b < nfunc; b++)
 			{
-				B[b] = sp_tmp_ptr->lambda[b];
+				B[b] = sp_tmp[i].lambda[b];
 			}
 			D[i][j] = CalculateDistance(A[0], A[1], B[0], B[1]);
-			//tmp_ptr = tmp_ptr->next;
 		}
-		//sp_ptr = sp_ptr->next;
 	}
-	sp_tmp_ptr = tmp1_ptr;
 	for(int i = 0; i < popsize; i++)
 	{
 		double tmp[popsize];
@@ -81,7 +71,7 @@ void CreateSubProblems(subproblems *sp_tmp_ptr)
 		}
 		for(int j = 0; j < T; j++)
 		{
-			sp_tmp_ptr->Neighbors[j] = SO[i][j];
+			sp_tmp[i].Neighbors[j] = SO[i][j];
 		}
 		//sp_ptr = sp_ptr->next;
 	}
@@ -108,20 +98,3 @@ double CalculateDistance(double x1, double y1, double x2, double y2)
 	
 	return distance;
 }
-
-/*double * sort(double[] a)
-{
-	for (int i = 0; i < popsize; i++)                     //Loop for ascending ordering
-	{
-		for (int j = 1; j < popsize; j++)             //Loop for comparing other values
-		{
-			if (a[j] > a[i])                //Comparing other array elements
-			{
-				int tmp = a[i];         //Using temporary variable for storing last value
-				a[i] = a[j];            //replacing value
-				a[j] = tmp;             //storing last value
-			}  
-		}
-	}
-	return a;
-}*/
