@@ -4,8 +4,7 @@ void init(population *pop_ptr);
 void init(population *pop_ptr)
 {
   int i,j,r;
-  float d;
-  pop_ptr->ind_ptr = &(pop_ptr->ind[0]); 
+  float d; 
   
   /*Loop Over the population size*/
   for (i = 0 ; i < popsize ; i++)
@@ -19,16 +18,14 @@ void init(population *pop_ptr)
 	  d = randomperc();
 	  if(d >= 0.5)
 	    {
-	      pop_ptr->ind_ptr->genes[j] = 1;
+	      pop_ptr->ind[i].genes[j] = 1;
 	    }
 	  else
 	    {
-	      pop_ptr->ind_ptr->genes[j] = 0;
+	      pop_ptr->ind[i].genes[j] = 0;
 	    } 
 	}
-      pop_ptr->ind_ptr = &(pop_ptr->ind[i+1]);
     }
-  pop_ptr->ind_ptr = &(pop_ptr->ind[0]); 
  return;
 }
 

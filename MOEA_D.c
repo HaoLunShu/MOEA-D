@@ -81,6 +81,7 @@ inp-rb(template file input-rl+bin): Some variables are real and some are binary
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 #define square(x) ((x)*(x))
 #define maxpop   500  /*Max population */
@@ -123,22 +124,16 @@ typedef struct       /*individual properties*/
     flag;              /*Flag for ranking*/
   float xreal[maxvar], /*list of real variables*/
     xbin[maxvar];      /*list of decoded value of the chromosome */
-  float fitness[maxfun],/*Fitness values(cost) */
+  float fitness[maxfun], /*Fitness values(cost) */
     constr[maxcons],     /*Constraints values*/
     //cub_len,             /*crowding distance of the individual*/
-    error;              /* overall constraint violation for the individual*/
-  float Position[maxvar],
-    g;
+    error;               /*overall constraint violation for the individual*/
+  double lambda[maxfun];
+  float g;
+  int Neighbors[maxpop];
 }individual;        /*Structure defining individual*/
 
 int T = 0;
-
-typedef struct
-{
-	double lambda[maxfun];
-	int Neighbors[maxpop],
-		*NB_ptr;
-}subproblems;
 
 typedef struct
 {
@@ -146,10 +141,7 @@ typedef struct
   int IsDominated;
   float rankrat[maxpop];  /*Rank Ratio*/
   int rankno[maxpop];     /*Individual at different ranks*/
-  individual ind[maxpop], /*Different Individuals*/
-    *ind_ptr;
-  subproblems sp[maxpop],
-	*sp_ptr;
+  individual ind[maxpop]; /*Different Individuals*/
 }population;             /*Popuation Structure*/
 
 
@@ -205,9 +197,16 @@ population oldpop,
   *mate_pop_ptr,
   *EP_ptr;
 /*Defining the population Structures*/
-
-/*subproblems sp,
-  *c_sp_ptr;*/
+  
+double norm(double x[])
+{
+	double m_sum = 0.0;
+	for (int i=0; i < nfunc; i++)
+	{
+		m_sum  += pow(x[i], 2);
+	}
+	return sqrt(m_sum);
+}
   
 main(int argc, char *argv[])
 {
@@ -215,7 +214,7 @@ main(int argc, char *argv[])
 	/*Some Local variables to this Problem (Counters And some other pointers*/
 
 	int i,j,l,f,maxrank1;
-	float *ptr,tot,*fitn_ptr;
+	float tot;
 	FILE
 		*fp,  
 		*rep_ptr,
@@ -225,11 +224,6 @@ main(int argc, char *argv[])
 		*g_var,
 		*lastit;
 	/*File Pointers*/
-	
-	/*subproblems *sp1_ptr;
-	sp1_ptr = (subproblems*) malloc(sizeof(subproblems));*/
-	
-	//CreateSubProblems();
 
 	rep_ptr = fopen("output.out","w");
 	gen_ptr =fopen("all_fitness.out","w");
@@ -291,41 +285,53 @@ main(int argc, char *argv[])
 	}
 	
 	EP_ptr = (population*) malloc(sizeof(population));
-	EP_ptr->ind_ptr = &(EP_ptr->ind[0]);
 	
 	for(int x = 0; x < popsize; x++)
 	{
 		for(int y = 0; y < chrom; y++)
 		{
-			EP_ptr->ind_ptr->genes[y] = 0;
+			EP_ptr->ind[x].genes[y] = 0;
 		}
-		EP_ptr->ind_ptr = &(EP_ptr->ind[x+1]);
 		for(int z = 0; z < nvar; z++)
 		{
 			EP_ptr->ind[x].xreal[z] = 0;
 		}
 	}
 
-	old_pop_ptr = &(oldpop);
-	old_pop_ptr->sp_ptr = &(old_pop_ptr->sp[0]);
-	//c_sp_ptr = &(sp);
-	
-	// Create Sub-problems
-	CreateSubProblems(old_pop_ptr->sp_ptr);
-
 	// decode binary strings
 	decode(old_pop_ptr); 
 
 	old_pop_ptr = &(oldpop);
 	new_pop_ptr = &(newpop);
+	double lamb[nfunc];
 
 	for(j = 0;j < popsize;j++)
 	{
+		for(int y = 0; y < nfunc; y++)
+		{
+			srand( time(NULL) );
+			/* 產生 [0, 1) 的浮點數亂數 */
+			lamb[y] = (double) rand() / (RAND_MAX + 1.0);
+		}
+		double n = norm(lamb);
+		for(int k = 0; k < nfunc; k++)
+		{
+			lamb[k] = lamb[k] / n;
+		}
+		for(int l = 0; l < nfunc; l++)
+		{
+			old_pop_ptr->ind[j].lambda[l] = lamb[l];
+		}
+		
 		/*Initializing the Rank array having different individuals
 		at a particular  rank to zero*/
 		old_pop_ptr->rankno[j] = 0;
 		new_pop_ptr->rankno[j] = 0;
 	}
+	
+	old_pop_ptr = &(oldpop);
+	// Create Sub-problems
+	CreateSubProblems(old_pop_ptr->ind);
 	
 	for(int k = 0; k < nfunc; k++)
 	{
@@ -339,33 +345,24 @@ main(int argc, char *argv[])
 	/*Function Calculaiton*/
 	
 	old_pop_ptr = &(oldpop);
-	old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[0]);
 	
 	for(int a = 0; a < popsize; a++)
 	{
-		old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[a]);
-		fitn_ptr = &(old_pop_ptr->ind_ptr->fitness[0]);
 		for(int b = 0; b < nfunc; b++)
 		{
-			fitn_ptr = &(old_pop_ptr->ind_ptr->fitness[b]);
-			if(z[b] > *fitn_ptr)
+			if(z[b] > old_pop_ptr->ind[a].fitness[b])
 			{
-				z[b] = *fitn_ptr;
+				z[b] = old_pop_ptr->ind[a].fitness[b];
 			}
 		}
 		//old_pop_ptr = old_pop_ptr->next;
 	}
 	
 	old_pop_ptr = &(oldpop);
-	old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[0]);
-	old_pop_ptr->sp_ptr = &(old_pop_ptr->sp[0]);
 	
 	for(int b = 0; b < popsize; b++)
 	{
-		old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[b]);
-		old_pop_ptr->sp_ptr = &(old_pop_ptr->sp[b]);
-		old_pop_ptr->ind_ptr->g = DecomposedCost(old_pop_ptr->ind_ptr, z, old_pop_ptr->sp_ptr->lambda);
-		//c_sp_ptr = c_sp_ptr->next;
+		old_pop_ptr->ind[b].g = DecomposedCost(old_pop_ptr->ind[b], z, old_pop_ptr->ind[b].lambda);
 	}
 	
 	DetermineDomination(old_pop_ptr);
@@ -382,27 +379,13 @@ main(int argc, char *argv[])
 			EP_ptr->rankrat[c] = old_pop_ptr->rankrat[c];
 			EP_ptr->rankno[c] = old_pop_ptr->rankno[c];
 			EP_ptr->ind[c] = old_pop_ptr->ind[c];
-			EP_ptr->sp[c] = old_pop_ptr->sp[c];
 		}
-		//old_pop_ptr = old_pop_ptr->next;
 	}
-	
-	/*Node* start;
-	Node* ptr = (Node*) malloc(sizeof(Node));
-	start = ptr;
-	Node* newNode = (Node*) malloc(sizeof(Node));
-	ptr=>next = newNode;
-	ptr->next = (Node*)malloc(sizeof(Node));
-	ptr->next->value = 10;*/
 
 	fprintf(rep_ptr,"----------------------------------------------------\n");
 	fprintf(rep_ptr,"Statistics at Generation 0 ->\n");
 	fprintf(rep_ptr,"--------------------------------------------------\n");
 	
-	//population p1, p2;
-	population *p1_ptr, *p2_ptr;
-	
-	//individual tmp_ind;
 
 	/********************************************************************/
 	/*----------------------GENERATION STARTS HERE----------------------*/
@@ -410,52 +393,10 @@ main(int argc, char *argv[])
 	{
 		printf("Generation = %d\n",i+1);
 		old_pop_ptr = &(oldpop);
-		//p1_tmp_ptr = &(p1);
-		//p2_tmp_ptr == &(p2);
 		mate_pop_ptr = &(matepop);
-		old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[0]);
-		old_pop_ptr->sp_ptr = &(old_pop_ptr->sp[0]);
 		fprintf(rep_ptr,"Population at generation no. -->%d\n",i+1);
 		fprintf(gen_ptr,"#Generation No. -->%d\n",i+1);
 		fprintf(gen_ptr,"#Variable_vector  Fitness_vector Constraint_violation Overall_penalty\n");
-
-		/*for(int j = 0; j < popsize; j++)
-		{		
-			int rnd1 = rnd(0,T);
-			int rnd2 = rnd(0,T);
-
-			int j1 = 0;
-			int j2 = 0;
-		
-			p1_ptr = old_pop_ptr->ind_ptr;
-			p2_ptr = old_pop_ptr->ind_ptr;
-			
-			j1 = old_pop_ptr->sp_ptr->NB_ptr = &(old_pop_ptr->sp_ptr->Neighbors[rnd1]);
-			/*for(int x = 0; x <= j1; x++)
-			{
-				p1_ptr = p1_ptr->next;
-			}
-			p1_ptr = &(p1_ptr->ind[j1]);
-			//p1_tmp_ptr = p1_ptr;
-			//p1_tmp_ptr = p1_tmp_ptr->next;
-			
-			//mate_pop_ptr = p1_ptr;
-			//mate_pop_ptr = mate_pop_ptr->next;
-			
-			j2 = old_pop_ptr->sp_ptr->NB_ptr = &(old_pop_ptr->sp_ptr->Neighbors[rnd2]);
-			/*for(int x = 0; x <= j2; x++)
-			{
-				p2_ptr = p2_ptr->next;
-			}
-			p2_ptr = &(p2_ptr->ind[j2]);
-			//p2_tmp_ptr = p2_ptr;
-			//p2_tmp_ptr = p2_tmp_ptr->next;
-			
-			//mate_pop_ptr = p2_ptr;
-			//mate_pop_ptr = mate_pop_ptr->next;
-			
-			//c_sp_ptr = c_sp_ptr->next;
-		}*/
 
 		/*--------SELECT----------------*/
 		nselect(old_pop_ptr ,mate_pop_ptr );
@@ -515,58 +456,36 @@ main(int argc, char *argv[])
 		func(new_pop_ptr );
 	
 		new_pop_ptr = &(newpop);
-		new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[0]);
 		
 		for(int a = 0; a < popsize; a++)
 		{
-			new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[a]);
-			fitn_ptr = &(new_pop_ptr->ind_ptr->fitness[0]);
 			for(int b = 0; b < nfunc; b++)
 			{
-				fitn_ptr = &(new_pop_ptr->ind_ptr->fitness[b]);
-				if(z[b] > *fitn_ptr)
+				if(z[b] > new_pop_ptr->ind[a].fitness[b])
 				{
-					z[b] = *fitn_ptr;
+					z[b] = new_pop_ptr->ind[a].fitness[b];
 				}
 			}
-			//new_pop_ptr = new_pop_ptr->next;
 		}
 
 		/*-------------------SELECTION KEEPING FRONTS ALIVE--------------*/
 		old_pop_ptr = &(oldpop);
-		old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[0]);
-		old_pop_ptr->sp_ptr = &(old_pop_ptr->sp[0]);
 		new_pop_ptr = &(newpop);
-		new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[0]);
-		new_pop_ptr->sp_ptr = &(new_pop_ptr->sp[0]);
 		mate_pop_ptr = &(matepop);
-		int *old_ptr, *new_ptr;
-		float *old_ptr_r, *new_ptr_r;
-		//c_sp_ptr->NB_ptr = &(c_sp_ptr->Neighbors[0]);
 		
 		for(int a = 0; a < popsize; a++)
 		{
 			for(int b = 0; b < T; b++)
 			{
-				old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[b]);
-				old_ptr = &(old_pop_ptr->ind_ptr->genes[0]);
-				old_ptr_r = &(old_pop_ptr->ind_ptr->xreal[0]);
-				old_pop_ptr->ind_ptr->g = DecomposedCost(old_pop_ptr->ind_ptr, z, old_pop_ptr->sp_ptr->lambda);
-				new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[b]);
-				new_ptr = &(new_pop_ptr->ind_ptr->genes[0]);
-				new_ptr_r = &(new_pop_ptr->ind_ptr->xreal[0]);
-				new_pop_ptr->ind_ptr->g = DecomposedCost(new_pop_ptr->ind_ptr, z, new_pop_ptr->sp_ptr->lambda);
-				//c_sp_ptr->NB_ptr = &(c_sp_ptr->Neighbors[b]);
-				if(new_pop_ptr->ind_ptr->g <= old_pop_ptr->ind_ptr->g)
+				old_pop_ptr->ind[b].g = DecomposedCost(old_pop_ptr->ind[b], z, old_pop_ptr->ind[b].lambda);
+				new_pop_ptr->ind[b].g = DecomposedCost(new_pop_ptr->ind[b], z, new_pop_ptr->ind[b].lambda);
+				if(new_pop_ptr->ind[b].g <= old_pop_ptr->ind[b].g)
 				{
 					for(j = 0;j < chrom;j++)
-						*old_ptr++=*new_ptr++;
+						old_pop_ptr->ind[b].genes[j]=new_pop_ptr->ind[b].genes[j];
 					for(j = 0;j < nvar;j++)
-						*old_ptr_r++=*new_ptr_r++;
+						old_pop_ptr->ind[b].xreal[j]=new_pop_ptr->ind[b].xreal[j];
 				}
-				/*c_sp_ptr = c_sp_ptr->next;
-				old_pop_ptr = old_pop_ptr->next;
-				new_pop_ptr = new_pop_ptr->next;*/
 			}
 		}
 		
@@ -574,7 +493,7 @@ main(int argc, char *argv[])
 		
 		DetermineDomination(old_pop_ptr);
 		
-		//EP_ptr = &(EP);
+		EP_ptr = &(EP);
 		old_pop_ptr = &(oldpop);
 		
 		for(int c = 0; c < popsize; c++)
@@ -586,23 +505,18 @@ main(int argc, char *argv[])
 				EP_ptr->rankrat[c] = old_pop_ptr->rankrat[c];
 				EP_ptr->rankno[c] = old_pop_ptr->rankno[c];
 				EP_ptr->ind[c] = old_pop_ptr->ind[c];
-				EP_ptr->sp[c] = old_pop_ptr->sp[c];
 			}
-			//old_pop_ptr = old_pop_ptr->next;
 		}
 
 		/*Elitism And Sharing Implemented*/
 		//keepalive(old_pop_ptr ,new_pop_ptr ,mate_pop_ptr,i+1);      
 
-		//mate_pop_ptr = &(matepop);
 		EP_ptr = &(EP);
 		if(nchrom > 0)
 		{
-			//decode(mate_pop_ptr);
 			decode(EP_ptr);
 		}
 
-		//mate_pop_ptr = &(matepop);
 		EP_ptr = &(EP);
 		/*------------------REPORT PRINTING--------------------------------*/  
 		//report(i ,old_pop_ptr ,mate_pop_ptr ,rep_ptr ,gen_ptr, lastit );
@@ -655,20 +569,18 @@ main(int argc, char *argv[])
 
 		for(j = 0;j < popsize;j++)
 		{
-			old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[j]);
-			new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[j]);
 			if(nchrom > 0)
 			{
 				/*For Binary GA copying of the chromosome*/
 
 				for(l = 0;l < chrom;l++)
 				{
-					old_pop_ptr->ind_ptr->genes[l]=new_pop_ptr->ind_ptr->genes[l];
+					old_pop_ptr->ind[j].genes[l]=new_pop_ptr->ind[j].genes[l];
 				}
 
 				for(l = 0;l < nchrom;l++)
 				{
-					old_pop_ptr->ind_ptr->xbin[l] = new_pop_ptr->ind_ptr->xbin[l];
+					old_pop_ptr->ind[j].xbin[l] = new_pop_ptr->ind[j].xbin[l];
 				}
 			}
 			if(nvar > 0)
@@ -676,32 +588,29 @@ main(int argc, char *argv[])
 				/*For Real Coded GA copying of the chromosomes*/
 				for(l = 0;l < nvar;l++)
 				{
-					old_pop_ptr->ind_ptr->xreal[l] = new_pop_ptr->ind_ptr->xreal[l];
+					old_pop_ptr->ind[j].xreal[l] = new_pop_ptr->ind[j].xreal[l];
 				}
 			}
 
 			/*Copying the fitness vector */	  
 			for(l = 0 ; l < nfunc ;l++)
 			{
-				old_pop_ptr->ind_ptr->fitness[l] = new_pop_ptr->ind_ptr->fitness[l];
+				old_pop_ptr->ind[j].fitness[l] = new_pop_ptr->ind[j].fitness[l];
 			}
 
-			/*Copying the dummy fitness*/
-			//old_pop_ptr->ind_ptr->cub_len = new_pop_ptr->ind_ptr->cub_len;
-
 			/*Copying the rank of the individuals*/
-			old_pop_ptr->ind_ptr->rank = new_pop_ptr->ind_ptr->rank;
+			old_pop_ptr->ind[j].rank = new_pop_ptr->ind[j].rank;
 
 			/*Copying the error and constraints of the individual*/
 
-			old_pop_ptr->ind_ptr->error = new_pop_ptr->ind_ptr->error;
+			old_pop_ptr->ind[j].error = new_pop_ptr->ind[j].error;
 			for(l = 0;l < ncons;l++)
 			{
-				old_pop_ptr->ind_ptr->constr[l] = new_pop_ptr->ind_ptr->constr[l];
+				old_pop_ptr->ind[j].constr[l] = new_pop_ptr->ind[j].constr[l];
 			}
 
 			/*Copying the flag of the individuals*/
-			old_pop_ptr->ind_ptr->flag = new_pop_ptr->ind_ptr->flag;
+			old_pop_ptr->ind[j].flag = new_pop_ptr->ind[j].flag;
 		}   // end of j
 
 		maxrank1 = new_pop_ptr->maxrank ;
@@ -723,21 +632,19 @@ main(int argc, char *argv[])
 			old_pop_ptr = &(matepop);
 			for(f = 0;f < popsize ; f++) // for printing
 			{
-				old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[f]);
-
-				if ((old_pop_ptr->ind_ptr->error <= 0.0) && (old_pop_ptr->ind_ptr->rank == 1))  // for all feasible solutions and non-dominated solutions
+				if ((old_pop_ptr->ind[f].error <= 0.0) && (old_pop_ptr->ind[f].rank == 1))  // for all feasible solutions and non-dominated solutions
 				{
 					for(l = 0;l < nfunc;l++)
 					{
-						fprintf(end_ptr,"%f\t",old_pop_ptr->ind_ptr->fitness[l]);
+						fprintf(end_ptr,"%f\t",old_pop_ptr->ind[f].fitness[l]);
 					}
 					for(l = 0;l < ncons;l++)
 					{
-						fprintf(end_ptr,"%f\t",old_pop_ptr->ind_ptr->constr[l]);
+						fprintf(end_ptr,"%f\t",old_pop_ptr->ind[f].constr[l]);
 					}
 					if (ncons > 0)
 					{
-						fprintf(end_ptr,"%f\t",old_pop_ptr->ind_ptr->error);
+						fprintf(end_ptr,"%f\t",old_pop_ptr->ind[f].error);
 						fprintf(end_ptr,"\n");
 					}
 
@@ -745,7 +652,7 @@ main(int argc, char *argv[])
 					{
 						for(l = 0;l < nvar ;l++)
 						{
-							fprintf(g_var,"%f\t",old_pop_ptr->ind_ptr->xreal[l]);
+							fprintf(g_var,"%f\t",old_pop_ptr->ind[f].xreal[l]);
 						}
 						fprintf(g_var,"  ");
 					}
@@ -754,7 +661,7 @@ main(int argc, char *argv[])
 					{
 						for(l = 0;l < nchrom;l++)
 						{
-							fprintf(g_var,"%f\t",old_pop_ptr->ind_ptr->xbin[l]);
+							fprintf(g_var,"%f\t",old_pop_ptr->ind[f].xbin[l]);
 						}
 					}
 					fprintf(g_var,"\n");

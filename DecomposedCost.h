@@ -1,15 +1,12 @@
-//float DecomposedCost(individual *ind, float[] z, double[] lambda);
+float DecomposedCost(individual ind, float z[], double lambda[]);
 
-float DecomposedCost(individual *ind, float z[], double lambda[])
+float DecomposedCost(individual ind, float z[], double lambda[])
 {
 	float fx[maxfun];
-	float *cost_ptr;
 	double fabs_fx_z[maxfun];
-	cost_ptr = &(ind->fitness[0]);
 	for(int i = 0; i < nfunc; i++)
 	{
-		cost_ptr = &(ind->fitness[i]);
-		fx[i] = *cost_ptr;
+		fx[i] = ind.fitness[i];
 	}
 	for(int j = 0; j < nfunc; j++)
 	{

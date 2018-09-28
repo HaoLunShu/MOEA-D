@@ -20,15 +20,13 @@ void func(population *pop_ptr)
   int i,j,k; 
   float error, cc;
 
-  pop_ptr->ind_ptr= &(pop_ptr->ind[0]);
 
   /*Initializing the max rank to zero*/
   pop_ptr->maxrank = 0;
   for(i = 0;i < popsize;i++)
     {
-      pop_ptr->ind_ptr = &(pop_ptr->ind[i]);
-      realx_ptr = &(pop_ptr->ind_ptr->xreal[0]);
-      binx_ptr = &(pop_ptr->ind_ptr->xbin[0]);
+      realx_ptr = &(pop_ptr->ind[i].xreal[0]);
+      binx_ptr = &(pop_ptr->ind[i].xbin[0]);
       
       for(j = 0; j < nvar; j++)
 	{ // Real-coded variables 
@@ -40,8 +38,8 @@ void func(population *pop_ptr)
 	  x[nvar+j] = *binx_ptr++;
 	}
       
-      fitn_ptr = &(pop_ptr->ind_ptr->fitness[0]);
-      err_ptr = &(pop_ptr->ind_ptr->error);
+      fitn_ptr = &(pop_ptr->ind[i].fitness[0]);
+      err_ptr = &(pop_ptr->ind[i].error);
 
 
 
@@ -57,7 +55,7 @@ void func(population *pop_ptr)
       //f[1] = x[1];
 	  
 	  int m;
-	  int n = 30;
+	  int n = nvar + nchrom;
 	  double sum = 0;
 	  double g = 0;
 
@@ -95,7 +93,7 @@ void func(population *pop_ptr)
       
       for (k = 0;k < ncons; k++)
 	{
-	  pop_ptr->ind_ptr->constr[k] = cstr[k];
+	  pop_ptr->ind[i].constr[k] = cstr[k];
 	}
       error = 0.0;
       for (k = 0;k < ncons;k++)

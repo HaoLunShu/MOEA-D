@@ -9,26 +9,18 @@ void crossover(population *new_pop_ptr,population *mate_pop_ptr)
   int r;
   rnd=randomperc();  
 
-  new_pop_ptr->ind_ptr=&(new_pop_ptr->ind[0]);
-  
-  mate_pop_ptr->ind_ptr=&(mate_pop_ptr->ind[0]);
-
   for (i = 0,y = 0,n = 0;i < popsize/2;i++)
     {
-      new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[n]);
-      chld1=&(new_pop_ptr->ind_ptr->genes[0]);
+      chld1=&(new_pop_ptr->ind[n].genes[0]);
       n = n+1;
       
-      new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[n]);
-      chld2=&(new_pop_ptr->ind_ptr->genes[0]);
+      chld2=&(new_pop_ptr->ind[n].genes[0]);
       n = n+1;
       
-      mate_pop_ptr->ind_ptr = &(mate_pop_ptr->ind[y]);
-      par1 = &(mate_pop_ptr->ind_ptr->genes[0]);
+      par1 = &(mate_pop_ptr->ind[y].genes[0]);
       y = y+1;
       
-      mate_pop_ptr->ind_ptr = &(mate_pop_ptr->ind[y]);
-      par2 = &(mate_pop_ptr->ind_ptr->genes[0]);  
+      par2 = &(mate_pop_ptr->ind[y].genes[0]);  
       y = y+1;
       
       rnd = randomperc();

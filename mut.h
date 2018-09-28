@@ -8,12 +8,10 @@ void mutate(population *new_pop_ptr)
   float rand1,*rand_float_ptr;
 
   rand1=randomperc();
-  new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[0]);
   
   for(j = 0;j < popsize;j++)
     {
-      ptr= &(new_pop_ptr->ind_ptr->genes[0]);
-      new_pop_ptr->ind_ptr =&(new_pop_ptr->ind[j+1]);     
+      ptr= &(new_pop_ptr->ind[j].genes[0]);     
       
       /*Select bit */
       for (i = 0;i < chrom;i++)

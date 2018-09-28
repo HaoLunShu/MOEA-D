@@ -29,35 +29,34 @@ void report(int t,population *pop1_ptr,population *pop2_ptr,FILE *rep_ptr,FILE *
     {
       fprintf(rep_ptr,"\n------------------------------------------------\n"); 
 
-      ptr1_b = &(pop1_ptr->ind_ptr->xbin[0]);
-      ptr2_b = &(pop2_ptr->ind_ptr->xbin[0]);
+      ptr1_b = &(pop1_ptr->ind[i].xbin[0]);
+      ptr2_b = &(pop2_ptr->ind[i].xbin[0]);
 
-      ptr1 = &(pop1_ptr->ind_ptr->xreal[0]);
+      ptr1 = &(pop1_ptr->ind[i].xreal[0]);
       ptr2 = &(pop2_ptr->ind_ptr->xreal[0]);  // Deb 31/10/01
       
-      fptr = &(pop1_ptr->ind_ptr->fitness[0]);
-      fptr1 = &(pop2_ptr->ind_ptr->fitness[0]);
+      fptr = &(pop1_ptr->ind[i].fitness[0]);
+      fptr1 = &(pop2_ptr->ind[i].fitness[0]);
       
-      rptr = &(pop1_ptr->ind_ptr->rank);
-      rptr1 = &(pop2_ptr->ind_ptr->rank);
+      rptr = &(pop1_ptr->ind[i].rank);
+      rptr1 = &(pop2_ptr->ind[i].rank);
       
-      cons_ptr1 = &(pop1_ptr->ind_ptr->constr[0]);
-      cons_ptr2 = &(pop2_ptr->ind_ptr->constr[0]);
+      cons_ptr1 = &(pop1_ptr->ind[i].constr[0]);
+      cons_ptr2 = &(pop2_ptr->ind[i].constr[0]);
       
-      err2 = &(pop2_ptr->ind_ptr->error);
+      err2 = &(pop2_ptr->ind[i].error);
 
       for(j = 0;j < nvar;j++)
-	fprintf(rep_ptr,"%f ",*ptr1++);
+	fprintf(rep_ptr,"%f ",pop1_ptr->ind[i].xreal[j]);
 
       for(j = 0;j < nchrom; j++)
-	fprintf(rep_ptr,"%f ",*ptr1_b++);
+	fprintf(rep_ptr,"%f ",pop1_ptr->ind[i].xbin[j]);
       if (t == gener-1)
 	{
 	  for(j = 0;j < nfunc;j++)
 	    {   
 	      if ((*err2 <= 0.0) && (*rptr1 == 1))
-		fprintf(lastit,"%f\t",*fptr1++);
-	      else *fptr1++;
+		fprintf(lastit,"%f\t",pop2_ptr->ind[i].fitness[0]);
 	    }
 	  if ((*err2 <= 0.0) && (*rptr1 == 1))
 	    fprintf(lastit,"\n");
@@ -66,7 +65,7 @@ void report(int t,population *pop1_ptr,population *pop2_ptr,FILE *rep_ptr,FILE *
       fptr1 = &(pop2_ptr->ind_ptr->fitness[0]);
       
       for(j = 0;j < nfunc;j++)
-	fprintf(rep_ptr,"  %.4f",*fptr++);
+	fprintf(rep_ptr,"  %.4f",pop1_ptr->ind[i].fitness[j]);
       
       if(ncons != 0)
 	{
@@ -87,8 +86,8 @@ void report(int t,population *pop1_ptr,population *pop2_ptr,FILE *rep_ptr,FILE *
 	}
       for(j = 0;j < nchrom; j++)
 	{
-	  fprintf(rep_ptr,"%f ",*ptr2_b); 
-	  fprintf(gen_ptr,"%f ",*ptr2_b++);
+	  fprintf(rep_ptr,"%f ",pop2_ptr->ind[i].xbin[0]); 
+	  fprintf(gen_ptr,"%f ",pop2_ptr->ind[i].xbin[j]);
 	}
       for(j = 0;j < nfunc;j++)
 	{	

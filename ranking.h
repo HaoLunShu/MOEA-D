@@ -64,11 +64,10 @@ void ranking(population *pop_ptr)
 	{
 	  /*Select an individual which rank to be assigned*/
 	  
-	  pop_ptr->ind_ptr = &(pop_ptr->ind[i]);
 	  
-	  if(pop_ptr->ind_ptr->flag != 1 && pop_ptr->ind_ptr->flag != 0) 
+	  if(pop_ptr->ind[i].flag != 1 && pop_ptr->ind[i].flag != 0) 
 	    {
-	      ptr1 = &(pop_ptr->ind_ptr->fitness[0]);
+	      ptr1 = &(pop_ptr->ind[i].fitness[0]);
 	      
 	      for(j = 0;j < popsize ; j++)
 		{
@@ -78,8 +77,7 @@ void ranking(population *pop_ptr)
 		    {
 		      if(pop_ptr->ind[j].flag != 1)
 			{
-			  pop_ptr->ind_ptr = &(pop_ptr->ind[j]);
-			  ptr2 = &(pop_ptr->ind_ptr->fitness[0]);
+			  ptr2 = &(pop_ptr->ind[j].fitness[0]);
 			  
 			  /*Compare the two individuals for fitness*/
 			  val = indcmp(ptr1,ptr2);

@@ -67,12 +67,11 @@ void rankcon(population *pop_ptr)
 	{
 	  /*Select an individual which rank to be assigned*/
 
-	  pop_ptr->ind_ptr = &(pop_ptr->ind[i]);
 
-	  if(pop_ptr->ind_ptr->flag != 1 && pop_ptr->ind_ptr->flag != 0) 
+	  if(pop_ptr->ind[i].flag != 1 && pop_ptr->ind[i].flag != 0) 
 	    {
-	      ptr1 = &(pop_ptr->ind_ptr->fitness[0]);
-	      err_ptr1 = &(pop_ptr->ind_ptr->error);
+	      ptr1 = &(pop_ptr->ind[i].fitness[0]);
+	      err_ptr1 = &(pop_ptr->ind[i].error);
 
 	      for(j = 0;j < popsize ; j++)
 		{
@@ -82,9 +81,8 @@ void rankcon(population *pop_ptr)
 		    {
 		      if(pop_ptr->ind[j].flag != 1)
 			{
-			  pop_ptr->ind_ptr = &(pop_ptr->ind[j]);
-			  ptr2 = &(pop_ptr->ind_ptr->fitness[0]);
-			  err_ptr2 = &(pop_ptr->ind_ptr->error);
+			  ptr2 = &(pop_ptr->ind[j].fitness[0]);
+			  err_ptr2 = &(pop_ptr->ind[j].error);
 			  
 			  if(*err_ptr1 < 1.0e-6 && *err_ptr2 > 1.0e-6)
 			    {

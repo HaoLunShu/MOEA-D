@@ -26,9 +26,7 @@ void realinit(population *pop_ptr)
 	      pop_ptr->ind[i].xreal[j] = d*(lim_r[j][1] - lim_r[j][0])+lim_r[j][0];
 	    }
 	}
-      /* pop_ptr->ind_ptr = &(pop_ptr->ind[i+1]); */
     }
-  /*pop_ptr->ind_ptr = &(pop_ptr->ind[0]); */
  return;
 }
 

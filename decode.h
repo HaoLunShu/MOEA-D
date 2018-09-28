@@ -6,13 +6,11 @@ void decode(population *pop_ptr)
 {
   float *real_ptr;
   int i,sum,b,k,c,d,*gene_ptr,m,x;
-
-  pop_ptr->ind_ptr = &(pop_ptr->ind[0]);
   
   for(i = 0; i < popsize; i++)
     {
-      real_ptr = &(pop_ptr->ind_ptr->xbin[0]);
-      gene_ptr = &(pop_ptr->ind_ptr->genes[0]);
+      real_ptr = &(pop_ptr->ind[i].xbin[0]);
+      gene_ptr = &(pop_ptr->ind[i].genes[0]);
       for(m = 0; m < nchrom; m++)
 	{
 	  /*finding out the co-efficient 2 to the power of 
@@ -34,7 +32,6 @@ void decode(population *pop_ptr)
 	  *real_ptr =lim_b[m][0] + (sum/coef[m])*(lim_b[m][1]-lim_b[m][0]);
 	  real_ptr++;
 	}
-      pop_ptr->ind_ptr = &(pop_ptr->ind[i+1]);
     }
    return ;
 }
