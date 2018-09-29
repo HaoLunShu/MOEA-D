@@ -12,17 +12,13 @@ void unicross(population *new_pop_ptr, population *mate_pop_ptr)
 	{
 
 	  /*Select a bit for doing cross-over*/	
-	  new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[y]);
-	  chld1 = &(new_pop_ptr->ind_ptr->genes[j]);
+	  chld1 = &(new_pop_ptr->ind[y].genes[j]);
 
-	  new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[y+1]);
-	  chld2 = &(new_pop_ptr->ind_ptr->genes[j]);
+	  chld2 = &(new_pop_ptr->ind[y+1].genes[j]);
 	
-	  mate_pop_ptr->ind_ptr = &(mate_pop_ptr->ind[n]);
-	  par1 = &(mate_pop_ptr->ind_ptr->genes[j]);
+	  par1 = &(mate_pop_ptr->ind[n].genes[j]);
 
-	  mate_pop_ptr->ind_ptr = &(mate_pop_ptr->ind[n+1]);
-	  par2 = &(mate_pop_ptr->ind_ptr->genes[j]);
+	  par2 = &(mate_pop_ptr->ind[n+1].genes[j]);
 
 	  rnd = randomperc();
 
@@ -48,11 +44,10 @@ void unicross(population *new_pop_ptr, population *mate_pop_ptr)
 
   for(i = 0;i < popsize;i++)
     {
-      new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[i]);
-      gene = &(new_pop_ptr->ind_ptr->genes[0]);
+      gene = &(new_pop_ptr->ind[i].genes[0]);
       for(j = 0;j < chrom;j++)
 	{
-	  gene = &(new_pop_ptr->ind_ptr->genes[j]);
+	  gene = &(new_pop_ptr->ind[i].genes[j]);
 	}
     }
   return;

@@ -20,31 +20,11 @@ void report(int t,population *pop1_ptr,population *pop2_ptr,FILE *rep_ptr,FILE *
   else
     fprintf(rep_ptr," variables (real %d binary %d)  fitness (%d) constraint (%d) penalty rank cublen || variables  fitness constraint penalty rank cublen\n",nvar,nchrom,nfunc,ncons);
   
-  pop1_ptr->ind_ptr = &(pop1_ptr->ind[0]);
-  
-  pop2_ptr->ind_ptr = &(pop2_ptr->ind[0]); // Deb 31/10/01
 
 
   for(i = 0;i < popsize;i++)
     {
-      fprintf(rep_ptr,"\n------------------------------------------------\n"); 
-
-      ptr1_b = &(pop1_ptr->ind[i].xbin[0]);
-      ptr2_b = &(pop2_ptr->ind[i].xbin[0]);
-
-      ptr1 = &(pop1_ptr->ind[i].xreal[0]);
-      ptr2 = &(pop2_ptr->ind_ptr->xreal[0]);  // Deb 31/10/01
-      
-      fptr = &(pop1_ptr->ind[i].fitness[0]);
-      fptr1 = &(pop2_ptr->ind[i].fitness[0]);
-      
-      rptr = &(pop1_ptr->ind[i].rank);
-      rptr1 = &(pop2_ptr->ind[i].rank);
-      
-      cons_ptr1 = &(pop1_ptr->ind[i].constr[0]);
-      cons_ptr2 = &(pop2_ptr->ind[i].constr[0]);
-      
-      err2 = &(pop2_ptr->ind[i].error);
+      fprintf(rep_ptr,"\n------------------------------------------------\n");
 
       for(j = 0;j < nvar;j++)
 	fprintf(rep_ptr,"%f ",pop1_ptr->ind[i].xreal[j]);
@@ -55,14 +35,12 @@ void report(int t,population *pop1_ptr,population *pop2_ptr,FILE *rep_ptr,FILE *
 	{
 	  for(j = 0;j < nfunc;j++)
 	    {   
-	      if ((*err2 <= 0.0) && (*rptr1 == 1))
+	      if ((pop2_ptr->ind[i].error <= 0.0) && (pop2_ptr->ind[i].rank == 1))
 		fprintf(lastit,"%f\t",pop2_ptr->ind[i].fitness[0]);
 	    }
-	  if ((*err2 <= 0.0) && (*rptr1 == 1))
+	  if ((pop2_ptr->ind[i].error <= 0.0) && (pop2_ptr->ind[i].rank == 1))
 	    fprintf(lastit,"\n");
 	}
-      fptr =  &(pop1_ptr->ind_ptr->fitness[0]);
-      fptr1 = &(pop2_ptr->ind_ptr->fitness[0]);
       
       for(j = 0;j < nfunc;j++)
 	fprintf(rep_ptr,"  %.4f",pop1_ptr->ind[i].fitness[j]);
@@ -70,47 +48,41 @@ void report(int t,population *pop1_ptr,population *pop2_ptr,FILE *rep_ptr,FILE *
       if(ncons != 0)
 	{
 	  for(j = 0;j < ncons;j++)
-	    fprintf(rep_ptr,"  %.2e",*cons_ptr1++);
-	  fprintf(rep_ptr," %.2e",pop1_ptr->ind_ptr->error);
+	    fprintf(rep_ptr,"  %.2e",pop1_ptr->ind[i].constr[j]);
+	  fprintf(rep_ptr," %.2e",pop1_ptr->ind[i].error);
 	}
       
-      fprintf(rep_ptr," %d ",*rptr);
+      fprintf(rep_ptr," %d ",pop1_ptr->ind[i].rank);
       
-      //fprintf(rep_ptr,"%f ",pop1_ptr->ind_ptr->cub_len);
       fprintf(rep_ptr,"|**|");
 
       for(j = 0;j < nvar;j++)
 	{
-	  fprintf(rep_ptr," %f ",*ptr2);
-	  fprintf(gen_ptr," %f ",*ptr2++);
+	  fprintf(rep_ptr," %f ",pop2_ptr->ind[i].xreal[j]);
+	  fprintf(gen_ptr," %f ",pop2_ptr->ind[i].xreal[j]);
 	}
       for(j = 0;j < nchrom; j++)
 	{
-	  fprintf(rep_ptr,"%f ",pop2_ptr->ind[i].xbin[0]); 
+	  fprintf(rep_ptr,"%f ",pop2_ptr->ind[i].xbin[j]); 
 	  fprintf(gen_ptr,"%f ",pop2_ptr->ind[i].xbin[j]);
 	}
       for(j = 0;j < nfunc;j++)
 	{	
-	  fprintf(rep_ptr,"  %f",*fptr1);
-	  fprintf(gen_ptr,"  %f",*fptr1++);
+	  fprintf(rep_ptr,"  %f",pop2_ptr->ind[i].fitness[j]);
+	  fprintf(gen_ptr,"  %f",pop2_ptr->ind[i].fitness[j]);
 	}
-      fprintf(rep_ptr," %d ",*rptr1);
+      fprintf(rep_ptr," %d ",pop2_ptr->ind[i].rank);
       
       if(ncons != 0)
 	{
 	  for(j = 0;j < ncons;j++)
 	    {
-	      fprintf(rep_ptr,"  %.2e",*cons_ptr2);
-	      fprintf(gen_ptr,"  %.2e",*cons_ptr2++);
+	      fprintf(rep_ptr,"  %.2e",pop2_ptr->ind[i].constr[j]);
+	      fprintf(gen_ptr,"  %.2e",pop2_ptr->ind[i].constr[j]);
 	    }
-	  fprintf(rep_ptr," %.2e",pop2_ptr->ind_ptr->error);
-	  fprintf(gen_ptr," %.2e",pop2_ptr->ind_ptr->error);
+	  fprintf(rep_ptr," %.2e",pop2_ptr->ind[i].error);
+	  fprintf(gen_ptr," %.2e",pop2_ptr->ind[i].error);
 	}
-      
-      //fprintf(rep_ptr," %f ",pop2_ptr->ind_ptr->cub_len);
-      
-      pop1_ptr->ind_ptr = &(pop1_ptr->ind[i+1]);
-      pop2_ptr->ind_ptr = &(pop2_ptr->ind[i+1]);
       
       fprintf(gen_ptr,"\n");
     }
